@@ -20,9 +20,13 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(0,0,1280,720);
         contentPane= new JPanel();
+        //making new JPanel
         contentPane.setBorder(new EmptyBorder(0,0,0,0));
+        //making new pane and contentPane
         setContentPane(contentPane);
         
+        Original=new BufferedImage(640, 480, BufferedImage.TYPE_3BYTE_BGR);
+        Process=new BufferedImage(640, 480, BufferedImage.TYPE_3BYTE_BGR);
         vc= new VideoCap();
         new MyThread().start();
     }
@@ -93,7 +97,7 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
     {
         g=contentPane.getGraphics();
         Original=CopyBufferedImage(vc.getOneFrame());
-        g.drawImage(Original,0,0,this);
+        g.drawImage(Original,0,0,contentPane);
     }
     
     public BufferedImage CopyBufferedImage(BufferedImage bi)
@@ -113,9 +117,12 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                 Process=CopyBufferedImage(Original);
                 //buat program deteksi di sini
                 repaint();
-                try{
+                try
+                {
                     Thread.sleep(30);
-                }catch (InterruptedException ie){
+                }
+                catch (InterruptedException ie)
+                {
                 
                 }
             }
