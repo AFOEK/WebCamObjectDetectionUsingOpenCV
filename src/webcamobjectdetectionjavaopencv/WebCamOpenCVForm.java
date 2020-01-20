@@ -1,15 +1,18 @@
 package webcamobjectdetectionjavaopencv;
 
-import java.awt.EventQueue;
 import java.awt.Graphics;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 
 public class WebCamOpenCVForm extends javax.swing.JFrame 
 {
     private JPanel contentPane;
     private VideoCap vc;
+    private BufferedImage Original, Process;
     
     public WebCamOpenCVForm()
     {
@@ -89,7 +92,16 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
     public void paint(Graphics g)
     {
         g=contentPane.getGraphics();
-        g.drawImage(vc.getOneFrame(),0,0,this);
+        Original=CopyBufferedImage(vc.getOneFrame());
+        g.drawImage(Original,0,0,this);
+    }
+    
+    public BufferedImage CopyBufferedImage(BufferedImage bi)
+    {
+        ColorModel cm = bi.getColorModel();
+        boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+        WritableRaster rt = bi.copyData(null);
+        return new BufferedImage(cm, rt, isAlphaPremultiplied,null);
     }
         
     class MyThread extends Thread
@@ -98,6 +110,8 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
         public void run()
         {
             for(;;){
+                Process=CopyBufferedImage(Original);
+                //buat program deteksi di sini
                 repaint();
                 try{
                     Thread.sleep(30);
