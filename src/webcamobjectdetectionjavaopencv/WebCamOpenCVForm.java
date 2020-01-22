@@ -10,7 +10,7 @@ import java.awt.image.WritableRaster;
 
 public class WebCamOpenCVForm extends javax.swing.JFrame 
 {
-    private JPanel contentPane;
+    private JPanel contentPane1, contentPane2;
     private VideoCap vc;
     private BufferedImage Original, Process;
     
@@ -19,11 +19,13 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
         initComponents();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(0,0,1280,720);
-        contentPane= new JPanel();
-        //making new JPanel
-        contentPane.setBorder(new EmptyBorder(0,0,0,0));
-        //making new pane and contentPane
-        setContentPane(contentPane);
+        contentPane1= new JPanel();
+        contentPane2= new JPanel();
+        contentPane1.setBorder(new EmptyBorder(0,0,0,0));
+        contentPane2.setBorder(new EmptyBorder(0,0,0,0));
+        contentPane2.locate(1300, 0);
+        setContentPane(contentPane1);
+        setContentPane(contentPane2);
         
         Original=new BufferedImage(640, 480, BufferedImage.TYPE_3BYTE_BGR);
         Process=new BufferedImage(640, 480, BufferedImage.TYPE_3BYTE_BGR);
@@ -95,9 +97,12 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
     }
     public void paint(Graphics g)
     {
-        g=contentPane.getGraphics();
+        g=contentPane1.getGraphics();
+        g=contentPane2.getGraphics();
         Original=CopyBufferedImage(vc.getOneFrame());
-        g.drawImage(Original,0,0,contentPane);
+        Process=CopyBufferedImage(vc.getOneFrame());
+        g.drawImage(Original,0,0,contentPane1);
+        g.drawImage(Process,0,0,contentPane2);
     }
     
     public BufferedImage CopyBufferedImage(BufferedImage bi)
