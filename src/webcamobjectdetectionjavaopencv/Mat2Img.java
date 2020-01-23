@@ -7,7 +7,8 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
 
 public class Mat2Img {
-    static{
+    static
+    {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
     Mat mat = new Mat();
