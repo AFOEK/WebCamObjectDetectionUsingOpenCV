@@ -23,7 +23,7 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
         contentPane2= new JPanel();
         contentPane1.setBorder(new EmptyBorder(0,0,0,0));
         contentPane2.setBorder(new EmptyBorder(0,0,0,0));
-        contentPane2.locate(1300, 0);
+        contentPane2.setLocation(1900,0);
         setContentPane(contentPane1);
         setContentPane(contentPane2);
         
@@ -120,6 +120,7 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
         {
             for(;;){
                 Process=CopyBufferedImage(Original);
+                //Original=CopyBufferedImage(Process);
                 //buat program deteksi di sini
                 repaint();
                 try
