@@ -162,14 +162,15 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                         TempColor=ProcessColor%65536;
                         GP=(short)(TempColor/256);
                         RP=(short)(TempColor%256);
-                        R=(short) Math.abs(RF-RP); if (R<0) R+=255;
-                        G=(short) Math.abs(GF-GP); if (G<0) G+=255;
-                        B=(short) Math.abs(BF-BP); if (B<0) B+=255;
+                        R=(short) Math.abs(RF-RP); //if (R<0) R+=255;
+                        G=(short) Math.abs(GF-GP); //if (G<0) G+=255;
+                        B=(short) Math.abs(BF-BP); //if (B<0) B+=255;
                         if(R>Threshold || G>Threshold || B>Threshold)
                         {
                             diff=true;
                         }else{
-                            TempColor=B*65536+G*256+R;
+                            TempColor=B*65536+G*256+R; //this temp color are original
+                            //TempColor=16777215;//this temp color is white
                             Process.setRGB(x, y, TempColor);
                         }
                     }
@@ -177,7 +178,7 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                 repaint();
                 try
                 {
-                    Thread.sleep(55);
+                    Thread.sleep(50);
                 }
                 catch (InterruptedException ie)
                 {
