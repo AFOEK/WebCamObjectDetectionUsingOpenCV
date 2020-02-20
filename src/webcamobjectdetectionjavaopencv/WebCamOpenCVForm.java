@@ -149,7 +149,7 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                     {
                         FirstColor=FirstFrame.getRGB(x, y)+16777216;
                         ProcessColor=Original.getRGB(x, y);
-                        /*AF=(short)(FirstColor/16777216);
+                        AF=(short)(FirstColor/16777216);
                         FirstColor%=16777216;
                         BF=(short)(FirstColor/65536);
                         TempColor=FirstColor%65536;
@@ -167,10 +167,10 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                         RP=(short)(TempColor%256);
                         BP=(short)((BP+256)%256);
                         GP=(short)((GP+256)%256);
-                        RP=(short)((RP+256)%256);*/
+                        RP=(short)((RP+256)%256);
                         
                         
-                        RF=(short)(FirstColor/65536);
+                        /*RF=(short)(FirstColor/65536);
                         TempColor=(int)(FirstColor%65536);
                         GF=(short)(TempColor/256);
                         BF=(short)(TempColor%256);
@@ -179,7 +179,7 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                         RP=(short)(ProcessColor/65536);
                         TempColor=(int)(ProcessColor%65536);
                         GP=(short)(TempColor/256);
-                        BP=(short)(TempColor%256);
+                        BP=(short)(TempColor%256);*/
                         
                         R=(short) Math.abs(RF-RP); //if (R<0) R+=255;
                         G=(short) Math.abs(GF-GP); //if (G<0) G+=255;
@@ -188,8 +188,8 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                         {
                             diff=true;
                         }else{
-                            TempColor=B*65536+G*256+R; //this temp color are original
-                            //TempColor=16777215;//this temp color is white
+                            //TempColor=B*65536+G*256+R; //this temp color are original
+                            TempColor=16777215;//this temp color is white
                             Process.setRGB(x, y, TempColor);
                         }
                     }
