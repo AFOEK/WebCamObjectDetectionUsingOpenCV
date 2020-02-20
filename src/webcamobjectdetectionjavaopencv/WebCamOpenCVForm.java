@@ -147,14 +147,17 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                 {
                     for(x=0;x<Process.getWidth();x++)
                     {
-                        FirstColor=FirstFrame.getRGB(x, y);
+                        FirstColor=FirstFrame.getRGB(x, y)+16777216;
                         ProcessColor=Original.getRGB(x, y);
-                        AF=(short)(FirstColor/16777216);
+                        /*AF=(short)(FirstColor/16777216);
                         FirstColor%=16777216;
                         BF=(short)(FirstColor/65536);
                         TempColor=FirstColor%65536;
                         GF=(short)(TempColor/256);
                         RF=(short)(TempColor%256);
+                        BF=(short)((BF+256)%256);
+                        GF=(short)((GF+256)%256);
+                        RF=(short)((RF+256)%256);
                         
                         AP=(short)(ProcessColor/16777216);
                         ProcessColor%=16777216;
@@ -162,6 +165,22 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                         TempColor=ProcessColor%65536;
                         GP=(short)(TempColor/256);
                         RP=(short)(TempColor%256);
+                        BP=(short)((BP+256)%256);
+                        GP=(short)((GP+256)%256);
+                        RP=(short)((RP+256)%256);*/
+                        
+                        
+                        RF=(short)(FirstColor/65536);
+                        TempColor=(int)(FirstColor%65536);
+                        GF=(short)(TempColor/256);
+                        BF=(short)(TempColor%256);
+                        
+                        TempColor=ProcessColor/16777216;
+                        RP=(short)(ProcessColor/65536);
+                        TempColor=(int)(ProcessColor%65536);
+                        GP=(short)(TempColor/256);
+                        BP=(short)(TempColor%256);
+                        
                         R=(short) Math.abs(RF-RP); //if (R<0) R+=255;
                         G=(short) Math.abs(GF-GP); //if (G<0) G+=255;
                         B=(short) Math.abs(BF-BP); //if (B<0) B+=255;
