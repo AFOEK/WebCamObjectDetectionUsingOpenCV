@@ -7,13 +7,19 @@ import javax.swing.border.EmptyBorder;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
+import java.io.IOException;
 import java.lang.Math;
+import java.io.RandomAccessFile;
 
 public class WebCamOpenCVForm extends javax.swing.JFrame 
 {
     //private JPanel contentPane1, contentPane2;
     private VideoCap vc;
     private BufferedImage Original, Process, FirstFrame;
+    private short R, G, B;
+    private int Temp, PixelColor, size;
+    private byte buff[];
+    private RandomAccessFile f;
     
     public WebCamOpenCVForm()
     {
@@ -30,14 +36,16 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
         setContentPane(contentPane2);
         contentPane1.setSize(640, 480);
         contentPane2.setSize(640, 480);*/
-        this.setSize(1280, 800);
-        
+        this.setSize(1280, 800); 
         Original=new BufferedImage(640, 480, BufferedImage.TYPE_3BYTE_BGR);
         Process=new BufferedImage(640, 480, BufferedImage.TYPE_3BYTE_BGR);
         FirstFrame=new BufferedImage(640, 480, BufferedImage.TYPE_3BYTE_BGR);
+        size=Process.getHeight()*Process.getWidth()*3;
+        buff=new byte[size];
         vc= new VideoCap();
         FirstFrame=CopyBufferedImage(vc.getOneFrame());
         new MyThread().start();
+        //open file sama try new
     }
     
 
@@ -46,6 +54,16 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
     private void initComponents() {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                formMouseClicked(evt);
+            }
+        });
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -60,6 +78,41 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
+        int x,y, alamat;
+        alamat=0;
+        for(y=0;y<Process.getHeight();y++)
+        {
+            for(x=0;x<Process.getWidth();x++)
+            {
+                PixelColor=Process.getRGB(x, y)+16777216;
+                R=(short)(PixelColor/65536);
+                Temp=(int)(PixelColor%65536);
+                G=(short)(Temp/256);
+                B=(short)(Temp%256);
+                buff[alamat]=(byte)B; alamat++;
+                buff[alamat]=(byte)G; alamat++;
+                buff[alamat]=(byte)R; alamat++;
+            }
+        }
+        try{
+            f=new RandomAccessFile("/home/afoek/Saved.raw","rw");
+            /*f.write(Process.getHeight());
+            f.write(Process.getWidth());*/
+            f.write(buff,0,size);
+            f.close();
+        }
+        catch(IOException ex)
+        {
+            
+        }
+    }//GEN-LAST:event_formMouseClicked
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+        //fclose() pake try
+    }//GEN-LAST:event_formWindowClosing
 
     public static void main(String args[]) 
     {
@@ -181,9 +234,9 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                         GP=(short)(TempColor/256);
                         BP=(short)(TempColor%256);*/
                         
-                        R=(short) Math.abs(RF-RP); //if (R<0) R+=255;
-                        G=(short) Math.abs(GF-GP); //if (G<0) G+=255;
-                        B=(short) Math.abs(BF-BP); //if (B<0) B+=255;
+                        R=(short) Math.abs(RF-RP); if (R<0) R+=255;
+                        G=(short) Math.abs(GF-GP); if (G<0) G+=255;
+                        B=(short) Math.abs(BF-BP); if (B<0) B+=255;
                         if(R>Threshold || G>Threshold || B>Threshold)
                         {
                             diff=true;
@@ -192,11 +245,13 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                             TempColor=16777215;//this temp color is white
                             Process.setRGB(x, y, TempColor);
                         }
+                        //buffernya sini
                     }
                 }
                 repaint();
                 try
                 {
+                    //write file
                     Thread.sleep(50);
                 }
                 catch (InterruptedException ie)
