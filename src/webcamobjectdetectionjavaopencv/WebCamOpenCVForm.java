@@ -10,6 +10,8 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.lang.Math;
 import java.io.RandomAccessFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WebCamOpenCVForm extends javax.swing.JFrame 
 {
@@ -17,9 +19,10 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
     private VideoCap vc;
     private BufferedImage Original, Process, FirstFrame;
     private short R, G, B;
-    private int Temp, PixelColor, size;
+    private int Temp, PixelColor, size, alamat=0;
     private byte buff[];
-    private RandomAccessFile f;
+    private RandomAccessFile filevideo, filephoto;
+    private Thread timer;
     
     public WebCamOpenCVForm()
     {
@@ -43,9 +46,106 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
         size=Process.getHeight()*Process.getWidth()*3;
         buff=new byte[size];
         vc= new VideoCap();
+        timer= new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                int z, y, x, Color, FirstColor, ProcessColor, TempColor;
+                boolean diff;
+                short Threshold=30, R, G, B, BF, GF, RF, BP, GP, RP, AF, AP;
+                for(;;)
+                {
+                    alamat=0;
+                    Process=CopyBufferedImage(Original);
+                    diff=false;
+                    for(y=0;y<Process.getHeight();y++)
+                    {
+                        for(x=0;x<Process.getWidth();x++)
+                        {
+                            FirstColor=FirstFrame.getRGB(x, y)+16777216;
+                            ProcessColor=Original.getRGB(x, y);
+                            AF=(short)(FirstColor/16777216);
+                            FirstColor%=16777216;
+                            BF=(short)(FirstColor/65536);
+                            TempColor=FirstColor%65536;
+                            GF=(short)(TempColor/256);
+                            RF=(short)(TempColor%256);
+                            BF=(short)((BF+256)%256);
+                            GF=(short)((GF+256)%256);
+                            RF=(short)((RF+256)%256);
+                        
+                            AP=(short)(ProcessColor/16777216);
+                            ProcessColor%=16777216;
+                            BP=(short)(ProcessColor/65536);
+                            TempColor=ProcessColor%65536;
+                            GP=(short)(TempColor/256);
+                            RP=(short)(TempColor%256);
+                            BP=(short)((BP+256)%256);
+                            GP=(short)((GP+256)%256);
+                            RP=(short)((RP+256)%256);
+                                                
+                            /*RF=(short)(FirstColor/65536);
+                            TempColor=(int)(FirstColor%65536);
+                            GF=(short)(TempColor/256);
+                            BF=(short)(TempColor%256);
+                        
+                            TempColor=ProcessColor/16777216;
+                            RP=(short)(ProcessColor/65536);
+                            TempColor=(int)(ProcessColor%65536);
+                            GP=(short)(TempColor/256);
+                            BP=(short)(TempColor%256);*/
+                        
+                            R=(short) Math.abs(RF-RP); if (R<0) R+=255;
+                            G=(short) Math.abs(GF-GP); if (G<0) G+=255;
+                            B=(short) Math.abs(BF-BP); if (B<0) B+=255;
+                            if(R>Threshold || G>Threshold || B>Threshold)
+                            {
+                                diff=true;
+                            }else{
+                                //TempColor=B*65536+G*256+R; //this temp color are original
+                                TempColor=16777215;//this temp color is white
+                                Process.setRGB(x, y, TempColor);
+                            }
+                            //buffernya sini
+                            buff[alamat]=(byte)B; alamat++;
+                            buff[alamat]=(byte)G; alamat++;
+                            buff[alamat]=(byte)R; alamat++;
+                        }
+                    }
+                    repaint();
+                    try
+                    {
+                        try
+                        {
+                            //write file
+                            filevideo.write(buff,0,size);
+                        }
+                        catch(IOException ex)
+                        {
+                        
+                        }
+                        timer.sleep(50);
+                    }
+                    catch (InterruptedException ie)
+                    {
+                
+                    }
+                }
+            }
+        });
         FirstFrame=CopyBufferedImage(vc.getOneFrame());
-        new MyThread().start();
         //open file sama try new
+        try
+        {
+            filevideo=new RandomAccessFile("home/afoek/Saved.raw","rw");
+            //filevideo=new RandomAccessFile("D:\\video.raw","rw");
+        }
+        catch(IOException ex)
+        {
+            
+        }
+        timer.start();
     }
     
 
@@ -80,12 +180,12 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
     }// </editor-fold>//GEN-END:initComponents
 
     private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
-        int x,y, alamat;
-        alamat=0;
+        int x,y;
         for(y=0;y<Process.getHeight();y++)
         {
             for(x=0;x<Process.getWidth();x++)
             {
+                alamat=0;
                 PixelColor=Process.getRGB(x, y)+16777216;
                 R=(short)(PixelColor/65536);
                 Temp=(int)(PixelColor%65536);
@@ -97,11 +197,12 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
             }
         }
         try{
-            f=new RandomAccessFile("/home/afoek/Saved.raw","rw");
+            filephoto=new RandomAccessFile("/home/afoek/Saved.raw","rw");
+            //filephoto=new RandomAccessFile("D:\\TESTPHOTO.raw","rw");
             /*f.write(Process.getHeight());
             f.write(Process.getWidth());*/
-            f.write(buff,0,size);
-            f.close();
+            filephoto.write(buff,0,size);
+            filephoto.close();
         }
         catch(IOException ex)
         {
@@ -111,7 +212,16 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
-        //fclose() pake try
+        try
+        {
+            timer.stop();
+            filevideo.close();
+        }
+        catch(IOException ex)
+        {
+            
+        }
+        
     }//GEN-LAST:event_formWindowClosing
 
     public static void main(String args[]) 
@@ -173,7 +283,7 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
         return new BufferedImage(cm, rt, isAlphaPremultiplied,null);
     }
         
-    class MyThread extends Thread
+    /*class MyThread extends Thread
     {
         @Override
         public void run()
@@ -184,17 +294,17 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
             for(;;){
                 Process=CopyBufferedImage(Original);
                 //Original=CopyBufferedImage(Process);
-//                for(y=0;y<Process.getHeight();y++)
-//                {
-//                    z=Process.getWidth()-1;
-//                    for(x=0;x<Process.getWidth()/2;x++)
-//                    {
-//                        Color=Process.getRGB(x, y);
-//                        Process.setRGB(x, y, Process.getRGB(z, y));
-//                        Process.setRGB(z,y,Color);
-//                        z--;
-//                    }
-//                }
+                for(y=0;y<Process.getHeight();y++)
+                {
+                    z=Process.getWidth()-1;
+                    for(x=0;x<Process.getWidth()/2;x++)
+                    {
+                        Color=Process.getRGB(x, y);
+                        Process.setRGB(x, y, Process.getRGB(z, y));
+                        Process.setRGB(z,y,Color);
+                        z--;
+                    }
+                }
                 diff=false;
                 for(y=0;y<Process.getHeight();y++)
                 {
@@ -232,7 +342,7 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                         RP=(short)(ProcessColor/65536);
                         TempColor=(int)(ProcessColor%65536);
                         GP=(short)(TempColor/256);
-                        BP=(short)(TempColor%256);*/
+                        BP=(short)(TempColor%256);
                         
                         R=(short) Math.abs(RF-RP); if (R<0) R+=255;
                         G=(short) Math.abs(GF-GP); if (G<0) G+=255;
@@ -246,12 +356,23 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                             Process.setRGB(x, y, TempColor);
                         }
                         //buffernya sini
+                        buff[alamat]=(byte)B; alamat++;
+                        buff[alamat]=(byte)G; alamat++;
+                        buff[alamat]=(byte)R; alamat++;
                     }
                 }
                 repaint();
                 try
                 {
-                    //write file
+                    try
+                    {
+                        //write file
+                        f.write(buff,0,size);
+                    }
+                    catch(IOException ex)
+                    {
+                        
+                    }
                     Thread.sleep(50);
                 }
                 catch (InterruptedException ie)
@@ -260,7 +381,7 @@ public class WebCamOpenCVForm extends javax.swing.JFrame
                 }
             }
         }
-    }
+    }*/
         
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
